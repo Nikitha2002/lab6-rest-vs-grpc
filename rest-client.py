@@ -41,11 +41,64 @@ def doAdd(addr, debug=False):
 
 
 def doDotProduct(addr, debug=False):
-    pass
 
+    # Generate two random vectors of length 100
+    a = [random.random() for _ in range(100)]
+    b = [random.random() for _ in range(100)]
+
+    # Prepare JSON payload
+    payload = {
+        'a': a,
+        'b': b
+    }
+
+    # Send request to REST server
+    dot_url = addr + '/api/dotproduct'
+    response = requests.post(dot_url, json=payload)
+
+    # Check for HTTP errors
+    response.raise_for_status()
+
+    # Verify the server's calculation
+    result = response.json()
+    expected = sum(x * y for x, y in zip(a, b))
+
+    assert abs(result['dotproduct'] - expected) < 1e-6, \
+        "Incorrect dot product result"
+
+    if debug:
+        print("Response is", response)
+        print(result)
 
 def doJsonImage(addr, debug=False):
-    pass
+
+    # Read the same image used by rawImage
+    with open('Flatirons_Winter_Sunrise_edit_2.jpg', 'rb') as f:
+        img = f.read()
+
+    # Convert binary image to Base64 string
+    image_base64 = base64.b64encode(img).decode('utf-8')
+
+    # Prepare JSON payload
+    payload = {
+        'image': image_base64
+    }
+
+    # Send request to REST server
+    image_url = addr + '/api/jsonimage'
+    response = requests.post(image_url, json=payload)
+
+    # Check for HTTP errors
+    response.raise_for_status()
+
+    # Verify the returned image dimensions
+    result = response.json()
+    assert result['width'] > 0 and result['height'] > 0, \
+        "Invalid image dimensions"
+
+    if debug:
+        print("Response is", response)
+        print(result)
 
 
 # ---------------------------------------------------------
